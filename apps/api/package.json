@@ -1,0 +1,21 @@
+{
+  "name": "@labordispatch/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.0",
+    "@labordispatch/db": "*",
+    "@labordispatch/demo": "*",
+    "@labordispatch/intake-agent": "*",
+    "@labordispatch/shared": "*",
+    "fastify": "^5.2.0",
+    "fastify-type-provider-zod": "^4.0.0",
+    "zod": "^3.24.0",
+    "@labordispatch/core": "*"
+  }
+}

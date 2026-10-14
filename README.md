@@ -70,3 +70,80 @@ Open field pro includes some infrastructure on this. We need motions for when th
 
 # DEMO: Dispatch receivers
 We need a way to have demo out, clearly labeled as demo so we can remove it when we are ready for prod.
+
+---
+
+# Getting started (implementation)
+
+The sections above are the product vision. Below is how to run what has been built so far.
+See `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md` and `docs/DECISIONS.md` for the design.
+
+## Prerequisites
+- Node.js 22+ (tested on 24). No database install needed: an embedded Postgres (PGlite) is used
+  until you set `DATABASE_URL`.
+- A Claude API key for the intake chatbot (`ANTHROPIC_API_KEY`). Everything except the chatbot
+  works without it.
+
+## Run it
+```bash
+npm install
+cp .env.example .env            # edit API_TOKEN at minimum
+npm run db:seed                 # creates ./.pglite with the README's example households
+npm run dev                     # API on http://localhost:3000
+```
+
+In a second terminal, the demo contractors (fake dispatch receivers):
+```bash
+npm run demo:receivers          # http://localhost:3100
+curl -X POST localhost:3000/demo/providers/wire-receivers \
+  -H "Authorization: Bearer $API_TOKEN" -H 'content-type: application/json' \
+  -d '{"receiversUrl":"http://localhost:3100"}'
+```
+
+Talk to the intake bot without Chatwoot (uses the seeded owner's phone):
+```bash
+curl -X POST localhost:3000/chat/demo-1/messages \
+  -H "Authorization: Bearer $API_TOKEN" -H 'content-type: application/json' \
+  -d '{"text":"my furnace at 11483 Essex Ave keeps shutting off","fromPhone":"+15555550101","channel":"sms"}'
+```
+
+Generate fake problems for A/B testing (demo only):
+```bash
+npm run demo:generate -- 5 --seed 42
+API_URL=http://localhost:3000 API_TOKEN=... npm run demo:generate -- 3   # also records them via the API
+```
+
+Expose capabilities to other AI agents over MCP:
+```bash
+npm run dev:mcp                 # stdio server; see apps/mcp-server/README.md for client config
+```
+
+## Connect Chatwoot
+1. In Chatwoot, create an SMS inbox (Twilio/Bandwidth) and/or a website inbox.
+2. Set `CHATWOOT_BASE_URL`, `CHATWOOT_ACCOUNT_ID`, `CHATWOOT_API_TOKEN` (an agent bot or user
+   access token) and a random `CHATWOOT_WEBHOOK_TOKEN` in `.env`.
+3. Add a webhook in Chatwoot pointing to `https://<your-host>/webhooks/chatwoot?token=<CHATWOOT_WEBHOOK_TOKEN>`
+   subscribed to `message_created`.
+Replies are posted back into the same conversation; escalations add a private note and reopen the
+conversation for a human agent.
+
+## Develop
+```bash
+npm run typecheck   # tsc -b across all workspaces
+npm test            # vitest, uses in-memory Postgres
+npm run db:generate # regenerate SQL migrations after editing packages/db/src/schema.ts
+```
+
+## Status
+| Area | State |
+|---|---|
+| Property & customer database with provenance, households, time-bounded trust | Built, tested |
+| Intake chatbot (Claude, tools, prompt-injection safe, basic troubleshooting) | Built; needs an API key to exercise live |
+| Chatwoot SMS/web-chat integration | Webhook + reply client built; not yet exercised against a live Chatwoot |
+| Work orders, owner approval, landlord/tenant rules | Built, tested |
+| Scheduling (holds, confirmation, conflicts, expiry) | Built, tested |
+| Provider network, dispatch rounds, "nobody accepted" procedure | Built, tested |
+| Invoicing, payments, disputes with owner involvement | Built, tested (no Stripe yet) |
+| MCP server for external agents | Built, tested |
+| DEMO: fake problem generator (A/B), fake dispatch receivers | Built, tested, quarantined |
+| Admin/dispatcher UI, web chat widget, Stripe, SMS code delivery | Not started |

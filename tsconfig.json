@@ -1,0 +1,26 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "packages/shared"
+    },
+    {
+      "path": "packages/db"
+    },
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "packages/intake-agent"
+    },
+    {
+      "path": "packages/demo"
+    },
+    {
+      "path": "apps/api"
+    },
+    {
+      "path": "apps/mcp-server"
+    }
+  ]
+}

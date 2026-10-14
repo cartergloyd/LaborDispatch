@@ -1,0 +1,33 @@
+{
+  "name": "labordispatch",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Automated maintenance intake chatbot with property/customer database, scheduling, and dispatch.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @labordispatch/api",
+    "dev:mcp": "npm run dev -w @labordispatch/mcp-server",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty",
+    "test": "vitest run",
+    "db:generate": "npm run generate -w @labordispatch/db",
+    "db:migrate": "tsx packages/db/src/migrate.ts",
+    "db:seed": "tsx packages/db/src/seed.ts",
+    "demo:generate": "tsx packages/demo/src/cli-generate.ts",
+    "demo:receivers": "tsx packages/demo/src/receivers-server.ts",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
